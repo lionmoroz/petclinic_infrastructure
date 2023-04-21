@@ -1,0 +1,11 @@
+## Template for run your java apllication like service
+
+[Unit]
+Description=PetClinic Application
+
+[Service]
+User=root
+ExecStart=/usr/bin/java -jar {{jar_jar_addition}} {{path_to_jar_file}}
+Restart=always
+[Install]
+WantedBy=multi-user.target

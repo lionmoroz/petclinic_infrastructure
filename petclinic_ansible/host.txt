@@ -1,0 +1,2 @@
+[prod_servers]
+linux1 ansible_host=35.205.79.53 ## Connection server ip

@@ -1,0 +1,40 @@
+---
+- name: Petclinic aplication set up
+  hosts: prod_servers
+  become: yes
+
+  vars:
+    sql_url: https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
+    source_file: ./sql_service/cloud-sql-proxy.j2
+    destin_file: /etc/systemd/system/cloud-sql-proxy.service
+    java_source_file: ./java_application_service/java_run_petclinic.j2
+    java_destin_file: /etc/systemd/system/java_run.service
+
+
+  tasks:
+  - name: Update my servers
+    apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+  - name: Upgrade my servers
+    apt: upgrade=dist force_apt_get=yes
+
+  - name: Install jdk
+    apt: name=openjdk-11-jdk state=latest install_recommends=no
+
+  - name: Install Mysql
+    apt: name=default-mysql-client state=latest
+
+  - name: Download CloudSQL Auth Proxy
+    get_url: url={{sql_url}} dest=/usr/local/bin/cloud_sql_proxy mode=0555
+
+  - name: Copy Sql to Service
+    template: src={{source_file}} dest={{destin_file}} mode=0555
+
+  - name: ReloadSystem for sql
+    systemd: daemon_reload=yes name=cloud-sql-proxy.service state=started enabled=yes
+
+  - name: Copy Run java to service
+    template: src={{java_source_file}} dest={{java_destin_file}} mode=0555
+
+  - name: ReloadSystem for petclinic
+    systemd: daemon_reload=yes name=java_run.service state=started enabled=yes
